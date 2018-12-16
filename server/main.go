@@ -70,6 +70,10 @@ func fetch(ctx context.Context, fc *geojson.FeatureCollection) {
 		}
 
 		datastore.NewQuery(g.Kind(Tanuki{})).Filter("Quadkey20 <= ",)
+		q := datastore.NewQuery(g.Kind(entity.FlipFoundations{})).
+			Filter("Quadkey20 >=", f1).
+			Filter("Quadkey20 <", f2).
+			KeysOnly()
 	}
 
 
@@ -77,7 +81,24 @@ func fetch(ctx context.Context, fc *geojson.FeatureCollection) {
 
 
 }
+func fixQuadkey(org string) (string, string) {
+	if 20 < len(org) {
+		return "", ""
+	}
+	lv := len(org)
+	// Quadkey Query Filter のMax値に利用するため、最後の数字に+1する。
+	lastString := org[lv-1:lv]
+	lastInt, _ := strconv.Atoi(lastString)
+	lastInt++
+	res2 := org[0:lv-1] + strconv.Itoa(lastInt)
 
+	diff := 20 - lv
+	for i := 0; i < diff; i++ {
+		org += "0"
+		res2 += "0"
+	}
+	return org,res2
+}
 func EstimateQuadkey(b orb.Bound, ilv int) *geojson.FeatureCollection {
 	lv := maptile.Zoom(ilv)
 	minTile := maptile.At(b.Min, lv)
