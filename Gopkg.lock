@@ -2,14 +2,50 @@
 
 
 [[projects]]
+  name = "github.com/golang/protobuf"
+  packages = ["proto"]
+  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
+  version = "v1.2.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mjibson/goon"
+  packages = ["."]
+  revision = "0c01b4bc4f4970fa6f91409bf7f134a10809219c"
+
+[[projects]]
   name = "github.com/paulmach/orb"
   packages = [".","geojson","internal/mercator","maptile"]
   revision = "c77a26f5d3c0cd178b029fe45ac5e2e82e0f085a"
   version = "v0.1.1"
 
+[[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = ["context"]
+  revision = "891ebc4b82d6e74f468c533b06f983c7be918a96"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sync"
+  packages = ["errgroup"]
+  revision = "42b317875d0fa942474b76e1b46a6060d720ae6e"
+
+[[projects]]
+  name = "google.golang.org/appengine"
+  packages = [".","datastore","internal","internal/app_identity","internal/base","internal/datastore","internal/log","internal/memcache","internal/modules","internal/remote_api","log","memcache"]
+  revision = "4a4468ece617fc8205e99368fa2200e9d1fad421"
+  version = "v1.3.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "abff89de86a49d736f8630aed18930de84967dc988156ccb831c69aea1e6aca0"
+  inputs-digest = "56abed4909ceed59a066e04f7622882e036363f0116c634b5f06be275432874c"
   solver-name = "gps-cdcl"
   solver-version = 1
