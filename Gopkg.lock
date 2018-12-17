@@ -2,12 +2,39 @@
 
 
 [[projects]]
+  digest = "1:e1ff887e232b2d8f4f7c7db15a5fac7be418025afc4dda53c59c765dbb5aa6b4"
+  name = "github.com/go-playground/locales"
+  packages = [
+    ".",
+    "currency",
+  ]
+  pruneopts = "UT"
+  revision = "f63010822830b6fe52288ee52d5a1151088ce039"
+  version = "v0.12.1"
+
+[[projects]]
+  digest = "1:e022cf244bcac1b6ef933f1a2e0adcf6a6dfd7b872d8d41e4d4179bb09a87cbc"
+  name = "github.com/go-playground/universal-translator"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b32fa301c9fe55953584134cb6853a13c87ec0a1"
+  version = "v0.16.0"
+
+[[projects]]
   digest = "1:97df918963298c287643883209a2c3f642e6593379f97ab400c2a2e219ab647d"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
   pruneopts = "UT"
   revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
   version = "v1.2.0"
+
+[[projects]]
+  digest = "1:6782ffc812e8e700e6952ede1e60487ff1fd9da489eff762985be662a7cfc431"
+  name = "github.com/leodido/go-urn"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "70078a794e8ea4b497ba7c19a78cd60f90ccf0f4"
+  version = "v1.1.0"
 
 [[projects]]
   branch = "master"
@@ -18,13 +45,15 @@
   revision = "0c01b4bc4f4970fa6f91409bf7f134a10809219c"
 
 [[projects]]
-  digest = "1:ce4e912bf57fc1a3728fc8b14c4d0bd65b1c7f904c18ac3ad9839338e7ef12e9"
+  digest = "1:c918a1a84af96d99756f67f3423dd244721e66f4794f3584544daf0eac2eda43"
   name = "github.com/paulmach/orb"
   packages = [
     ".",
     "geojson",
+    "internal/length",
     "internal/mercator",
     "maptile",
+    "planar",
   ]
   pruneopts = "UT"
   revision = "c77a26f5d3c0cd178b029fe45ac5e2e82e0f085a"
@@ -37,6 +66,14 @@
   pruneopts = "UT"
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
+
+[[projects]]
+  digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
 
 [[projects]]
   branch = "master"
@@ -75,6 +112,14 @@
   revision = "4a4468ece617fc8205e99368fa2200e9d1fad421"
   version = "v1.3.0"
 
+[[projects]]
+  digest = "1:8abc978192c2fca4d6a74260c3a8f4aa34d25bd3c548c938745b91b8b20cda1d"
+  name = "gopkg.in/go-playground/validator.v9"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0277b12d53df79c9dbf7311cb07fa9c81ed621bb"
+  version = "v9.24.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -83,10 +128,13 @@
     "github.com/paulmach/orb",
     "github.com/paulmach/orb/geojson",
     "github.com/paulmach/orb/maptile",
+    "github.com/paulmach/orb/planar",
     "github.com/pkg/errors",
+    "github.com/satori/go.uuid",
     "golang.org/x/sync/errgroup",
     "google.golang.org/appengine",
     "google.golang.org/appengine/datastore",
+    "gopkg.in/go-playground/validator.v9",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
