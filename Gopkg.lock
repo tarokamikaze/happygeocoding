@@ -2,50 +2,91 @@
 
 
 [[projects]]
+  digest = "1:97df918963298c287643883209a2c3f642e6593379f97ab400c2a2e219ab647d"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
+  pruneopts = "UT"
   revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
   version = "v1.2.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:e97a6f4c77f71471b34dbc72bf9ffe4f87d083993afebd8e71e758a60b6104ff"
   name = "github.com/mjibson/goon"
   packages = ["."]
+  pruneopts = "UT"
   revision = "0c01b4bc4f4970fa6f91409bf7f134a10809219c"
 
 [[projects]]
+  digest = "1:ce4e912bf57fc1a3728fc8b14c4d0bd65b1c7f904c18ac3ad9839338e7ef12e9"
   name = "github.com/paulmach/orb"
-  packages = [".","geojson","internal/mercator","maptile"]
+  packages = [
+    ".",
+    "geojson",
+    "internal/mercator",
+    "maptile",
+  ]
+  pruneopts = "UT"
   revision = "c77a26f5d3c0cd178b029fe45ac5e2e82e0f085a"
   version = "v0.1.1"
 
 [[projects]]
+  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
   name = "github.com/pkg/errors"
   packages = ["."]
+  pruneopts = "UT"
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:76ee51c3f468493aff39dbacc401e8831fbb765104cbf613b89bef01cf4bad70"
   name = "golang.org/x/net"
   packages = ["context"]
+  pruneopts = "UT"
   revision = "891ebc4b82d6e74f468c533b06f983c7be918a96"
 
 [[projects]]
   branch = "master"
+  digest = "1:b521f10a2d8fa85c04a8ef4e62f2d1e14d303599a55d64dabf9f5a02f84d35eb"
   name = "golang.org/x/sync"
   packages = ["errgroup"]
+  pruneopts = "UT"
   revision = "42b317875d0fa942474b76e1b46a6060d720ae6e"
 
 [[projects]]
+  digest = "1:3582c4c5fcfd5cdc8b6074a903546814f7770943f82c23cee7391f36bb3f8b1a"
   name = "google.golang.org/appengine"
-  packages = [".","datastore","internal","internal/app_identity","internal/base","internal/datastore","internal/log","internal/memcache","internal/modules","internal/remote_api","log","memcache"]
+  packages = [
+    ".",
+    "datastore",
+    "internal",
+    "internal/app_identity",
+    "internal/base",
+    "internal/datastore",
+    "internal/log",
+    "internal/memcache",
+    "internal/modules",
+    "internal/remote_api",
+    "log",
+    "memcache",
+  ]
+  pruneopts = "UT"
   revision = "4a4468ece617fc8205e99368fa2200e9d1fad421"
   version = "v1.3.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "56abed4909ceed59a066e04f7622882e036363f0116c634b5f06be275432874c"
+  input-imports = [
+    "github.com/mjibson/goon",
+    "github.com/paulmach/orb",
+    "github.com/paulmach/orb/geojson",
+    "github.com/paulmach/orb/maptile",
+    "github.com/pkg/errors",
+    "golang.org/x/sync/errgroup",
+    "google.golang.org/appengine",
+    "google.golang.org/appengine/datastore",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

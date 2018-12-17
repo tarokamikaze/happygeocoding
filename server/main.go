@@ -1,21 +1,22 @@
 package main
 
 import (
-	"google.golang.org/appengine"
-	"net/http"
-	"net/url"
-	"strings"
-	"github.com/pkg/errors"
-	"github.com/paulmach/orb"
-	"strconv"
-	"github.com/paulmach/orb/maptile"
-	"reflect"
-	"math"
-	"github.com/paulmach/orb/geojson"
 	"context"
 	"github.com/mjibson/goon"
-	"google.golang.org/appengine/datastore"
+	"github.com/paulmach/orb"
+	"github.com/paulmach/orb/geojson"
+	"github.com/paulmach/orb/maptile"
+	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
+	"math"
+	"net/http"
+	"net/url"
+	"reflect"
+	"strconv"
+	"strings"
+	"sync"
 )
 
 type (
@@ -23,8 +24,8 @@ type (
 		maptile.Tile
 	}
 	Tanuki struct {
-		ID        string             `datastore:"-" goon:"id"`
-		Name      string             `datastore:",noindex"`
+		ID        string `datastore:"-" goon:"id"`
+		Name      string `datastore:",noindex"`
 		Quadkey20 string
 		Geo       appengine.GeoPoint `datastore:",noindex"`
 	}
@@ -57,66 +58,92 @@ func Index(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fc := EstimateQuadkey(b, lv)
+	tiles := EstimateTiles(b, lv)
+	entities, err := fetchTanukis(ctx, tiles)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
+	// creating a feature collection
+	res, err := createGeoJson(b, tiles, entities)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+	return
 }
-func fetch(ctx context.Context, fc *geojson.FeatureCollection) {
+
+func createGeoJson(org orb.Bound, quadkeyTiles []QuadkeyTile, entities []*Tanuki) ([]byte, error) {
+	fc := geojson.NewFeatureCollection()
+	orgf := geojson.NewFeature(org.ToPolygon())
+	orgf.Properties["name"] = "request range"
+	fc = fc.Append(orgf)
+
+	ts := maptile.Tiles{}
+	ts.ToFeatureCollection()
+	for _, t := range quadkeyTiles {
+		tf := geojson.NewFeature(t.Bound().ToPolygon())
+		tf.Properties["quadkey"] = t.QuadkeyString()
+		fc = fc.Append(tf)
+	}
+
+	for _, e := range entities {
+		p := orb.Point{e.Geo.Lng, e.Geo.Lng}
+		ef := geojson.NewFeature(p)
+		ef.Properties["name"] = e.Name
+		fc = fc.Append(ef)
+	}
+	return fc.MarshalJSON()
+}
+
+func fetchTanukis(ctx context.Context, tiles []QuadkeyTile) ([]*Tanuki, error) {
 	g := goon.FromContext(ctx)
-	eg := errgroup.Group
-	for _, f := range fc.Features {
-		v, ok := f.Properties["quadkey"]
-		if !ok {
-			continue
+	eg := errgroup.Group{}
+	mu := new(sync.Mutex)
+	res := []*Tanuki{}
+
+	f := func(t QuadkeyTile) func() error {
+		return func() error {
+			qk1, qk2 := t.FixQuadkey()
+
+			q := datastore.NewQuery(g.Kind(Tanuki{})).
+				Filter("Quadkey20 >=", qk1).
+				Filter("Quadkey20 <", qk2).
+				KeysOnly()
+			entities := []*Tanuki{}
+			if _, err := g.GetAll(q, &entities); err != nil {
+				return err
+			}
+			mu.Lock()
+			defer mu.Unlock()
+			res = append(res, entities...)
+			return nil
 		}
-
-		datastore.NewQuery(g.Kind(Tanuki{})).Filter("Quadkey20 <= ",)
-		q := datastore.NewQuery(g.Kind(entity.FlipFoundations{})).
-			Filter("Quadkey20 >=", f1).
-			Filter("Quadkey20 <", f2).
-			KeysOnly()
 	}
 
-
-
-
-
+	for _, t := range tiles {
+		eg.Go(f(t))
+	}
+	err := eg.Wait()
+	return res, err
 }
-func fixQuadkey(org string) (string, string) {
-	if 20 < len(org) {
-		return "", ""
-	}
-	lv := len(org)
-	// Quadkey Query Filter のMax値に利用するため、最後の数字に+1する。
-	lastString := org[lv-1:lv]
-	lastInt, _ := strconv.Atoi(lastString)
-	lastInt++
-	res2 := org[0:lv-1] + strconv.Itoa(lastInt)
 
-	diff := 20 - lv
-	for i := 0; i < diff; i++ {
-		org += "0"
-		res2 += "0"
-	}
-	return org,res2
-}
-func EstimateQuadkey(b orb.Bound, ilv int) *geojson.FeatureCollection {
+func EstimateTiles(b orb.Bound, ilv int) []QuadkeyTile {
 	lv := maptile.Zoom(ilv)
 	minTile := maptile.At(b.Min, lv)
 	maxTile := maptile.At(b.Max, lv)
 
-	res := geojson.NewFeatureCollection()
-	f := geojson.NewFeature(b)
-	f.Properties["name"] = "request"
-
 	// 指定レベル内でtileがひとつだけ(指定レベルが範囲に対して比較的小さい)場合は
 	// 範囲内のタイルを総なめする価値がないのですぐ返す
 	if reflect.DeepEqual(minTile, maxTile) {
-		f := geojson.NewFeature(minTile.Bound().ToPolygon())
-		f.Properties["quadkey"] = QuadkeyTile{Tile: minTile}.QuadkeyString()
-		res.Append(f)
-		return res
+		return []QuadkeyTile{{Tile: minTile}}
 	}
 
+	res := []QuadkeyTile{}
 	minX := float64(minTile.X)
 	minY := float64(minTile.Y)
 	maxX := float64(maxTile.X)
@@ -130,10 +157,7 @@ func EstimateQuadkey(b orb.Bound, ilv int) *geojson.FeatureCollection {
 			if !tile.IsContained(b) {
 				continue
 			}
-
-			f := geojson.NewFeature(tile.Bound().ToPolygon())
-			f.Properties["quadkey"] = tile.QuadkeyString()
-			res.Append(f)
+			res = append(res, tile)
 		}
 	}
 	return res
@@ -195,4 +219,23 @@ func (t QuadkeyTile) IsContained(b orb.Bound) bool {
 		}
 	}
 	return false
+}
+func (t QuadkeyTile) FixQuadkey() (string, string) {
+	org := t.QuadkeyString()
+	if 20 < len(org) {
+		return "", ""
+	}
+	lv := len(org)
+	// Quadkey Query Filter のMax値に利用するため、最後の数字に+1する。
+	lastString := org[lv-1 : lv]
+	lastInt, _ := strconv.Atoi(lastString)
+	lastInt++
+	res2 := org[0:lv-1] + strconv.Itoa(lastInt)
+
+	diff := 20 - lv
+	for i := 0; i < diff; i++ {
+		org += "0"
+		res2 += "0"
+	}
+	return org, res2
 }
